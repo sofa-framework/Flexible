@@ -36,6 +36,7 @@ namespace shapefunction
 {
 
 using namespace defaulttype;
+using namespace core::behavior;
 
 SOFA_DECL_CLASS(VoronoiShapeFunction)
 
@@ -43,9 +44,11 @@ SOFA_DECL_CLASS(VoronoiShapeFunction)
 int VoronoiShapeFunctionClass = core::RegisterObject("Computes natural neighbor shape functions in images")
 
         .add< VoronoiShapeFunction<ShapeFunction3,ImageUC> >(true)
+        .add< VoronoiShapeFunction<ShapeFunction3,ImageD> >()
         ;
 
 template class SOFA_Flexible_API VoronoiShapeFunction<ShapeFunction3,ImageUC>;
+template class SOFA_Flexible_API VoronoiShapeFunction<ShapeFunction3,ImageD>;
 
 }
 }
