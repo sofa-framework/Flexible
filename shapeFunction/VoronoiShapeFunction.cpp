@@ -48,7 +48,10 @@ int VoronoiShapeFunctionClass = core::RegisterObject("Computes natural neighbor 
         .add< VoronoiShapeFunction<ShapeFunction3,ImageB> >()
         .add< VoronoiShapeFunction<ShapeFunction3,ImageF> >()
 
+        .add<VoronoiShapeFunction<ShapeFunction3,BranchingImageB> >()
         .add<VoronoiShapeFunction<ShapeFunction3,BranchingImageUC> >()
+        .add<VoronoiShapeFunction<ShapeFunction3,BranchingImageD> >()
+        .add<VoronoiShapeFunction<ShapeFunction3,BranchingImageUS> >()
         ;
 
 template class SOFA_Flexible_API VoronoiShapeFunction<ShapeFunction3,ImageUC>;
@@ -56,8 +59,10 @@ template class SOFA_Flexible_API VoronoiShapeFunction<ShapeFunction3,ImageD>;
 template class SOFA_Flexible_API VoronoiShapeFunction<ShapeFunction3,ImageB>;
 template class SOFA_Flexible_API VoronoiShapeFunction<ShapeFunction3,ImageF>;
 
+template class SOFA_Flexible_API VoronoiShapeFunction<ShapeFunction3,BranchingImageB>;
 template class SOFA_Flexible_API VoronoiShapeFunction<ShapeFunction3,BranchingImageUC>;
-
+template class SOFA_Flexible_API VoronoiShapeFunction<ShapeFunction3,BranchingImageD>;
+template class SOFA_Flexible_API VoronoiShapeFunction<ShapeFunction3,BranchingImageUS>;
 }
 }
 }
