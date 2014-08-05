@@ -2,12 +2,14 @@
 
 <Node 	name="Root" gravity="0 0 0" time="0" animate="0"  dt="0.5" showAxis="true">
   <RequiredPlugin pluginName="Flexible"/>
+  <RequiredPlugin pluginName="Compliant"/>
+  <RequiredPlugin pluginName="CompliantDev"/>
 
     <!--Solver-->
     <StaticSolver/>
-    <CGLinearSolver template="GraphScattered" name="linear solver" iterations="1000" tolerance="1e-12" threshold="1e-12" />
+    <CGLinearSolver template="GraphScattered" name="linear solver" iterations="200" tolerance="1e-12" threshold="1e-12" />
 
-    <!--Topology Hexahedra-->
+     <!--Topology Hexahedra-->
     <RegularGridTopology name="hexahedra" n="2 5 5" min="0 0 0" max="1 1 1"/>
 
     <!--MechanicalObject-->
@@ -29,33 +31,29 @@
     <ProjectToPlaneConstraint normal="1 0 0" indices="@[-1].indices" />
 
     <BarycentricShapeFunction template="ShapeFunctiond" />
-
-    <!--Quads for QuadPressureForceField-->
+    
+    <!--Decomposition of the cubes in tetrahedra -->
     <Node name="Quads" >
-      
+
+      <!--Quads for QuadPressureForceField-->
       <QuadSetTopologyContainer name="QuadContainer" />
       <QuadSetTopologyModifier />
       <QuadSetTopologyAlgorithms template="Vec3d" />
       <QuadSetGeometryAlgorithms template="Vec3d" />
-      <Hexa2QuadTopologicalMapping name="default28" input="@hexahedra" output="@QuadContainer" />
-      <QuadPressureForceField normal="1 0 0" dmin="0.99" dmax="1.01" showForces="1" />
-
+      <Hexa2QuadTopologicalMapping name="default28" object1="../hexahedra" object2="QuadContainer" />
+      <!--Compression-->
+      <QuadPressureForceField normal="1 0 0" dmin="0.99" dmax="1.01" showForces="1"/>
+     
     </Node>
-  
+
       <Node name="behavior">
         <TopologyGaussPointSampler name="sampler" inPosition="@../hexahedra.position" showSamplesScale="0" method="0" order="2" />
-        <MechanicalObject  template="F332" name="F"  showObject="0" showObjectScale="0.05" />
-        <LinearMapping template="Mapping&lt;Vec3d,F332&gt;" showDeformationGradientScale="0.05"  showDeformationGradientStyle="0 - All axis"  showColorOnTopology="2 - sqrt(det(F^T.F))-1"  />
+        <MechanicalObject  template="F331" name="F"  showObject="0" showObjectScale="0.05" />
+        <LinearMapping template="Mapping&lt;Vec3d,F331&gt;" showDeformationGradientScale="0.05"  showDeformationGradientStyle="0 - All axis"  showColorOnTopology="2 - sqrt(det(F^T.F))-1"  />
 
-         <!--Material-->
-         <Node name="Strain"   >
-            <MechanicalObject  template="E332" name="E"  />
-            <CorotationalStrainMapping template="Mapping&lt;F332,E332&gt;"   method="svd" geometricStiffness="true"/>
+          <Node name="Strain">
           </Node>
 
-      </Node>
-      
-</Node>
+    </Node>
 
 </Node>
-z
