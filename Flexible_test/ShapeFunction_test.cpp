@@ -23,13 +23,21 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 #include "stdafx.h"
+#include <Mapping_test.h>
 #include <sofa/helper/Quater.h>
 #include <sofa/helper/RandomGenerator.h>
+#include <image/ImageTypes.h>
+#include <image/ImageContainer.h>
+#include "../shapeFunction/VoronoiShapeFunction.h"
+#include "../shapeFunction/ShepardShapeFunction.h"
+#include "../shapeFunction/HatShapeFunction.h"
+#include "../shapeFunction/ShapeFunctionDiscretizer.h"
+#include "../shapeFunction/DiffusionShapeFunction.h"
+#include "../types/AffineTypes.h"
+#include "../types/DeformationGradientTypes.h"
 
 // Including component
 #include "../deformationMapping/LinearMapping.h"
-
-#include <Mapping_test.h>
 
 namespace sofa {
 
@@ -45,7 +53,7 @@ namespace sofa {
    */
 
     template <typename _Mapping>
-    struct AffineLinearDeformationMappings_test : public Mapping_test<_Mapping>
+    struct ShapeFunction_test : public Mapping_test<_Mapping>
     {
         typedef Mapping_test<_Mapping> Inherited;
         typedef typename Inherited::In In;
@@ -73,15 +81,81 @@ namespace sofa {
         sofa::helper::RandomGenerator randomGenerator;
 
         // Constructor: call the constructor of the base class which loads the scene to test
-        AffineLinearDeformationMappings_test() : Mapping_test<_Mapping>(std::string(FLEXIBLE_TEST_SCENES_DIR) + "/" + "AffineLineDeformationMapping.scn")
+        ShapeFunction_test() : Mapping_test<_Mapping>(std::string(FLEXIBLE_TEST_SCENES_DIR) + "/" + "ShapeFunctionTest.scn")
         {   
-            Inherited::errorMax = 5000;
-            seed=2;
+            // For F331Types
+            //Inherited::errorMax = 10000;
+            // For F332Types
+            Inherited::errorMax = 5e9;
+            seed=1;
             // Set random rotation and translation
             randomGenerator.initSeed(seed);
             this->SetRandomAffineTransform(seed);
         }
              
+        void SetShapeFunction (int shapeFunctionCase)
+        {
+            simulation::Node::SPtr patchNode = this->root->getChild("Patch");
+
+            // Complete the scene
+            typedef core::behavior::ShapeFunctionTypes<3,double> ShapeFunctionType;
+
+            // Get Image container
+            typedef typename component::container::ImageContainer<ImageUC> ImageContainer;
+            BaseContext* rootNode = this->root.get();
+            typename ImageContainer::SPtr imageContainerSptr = rootNode->get<ImageContainer >(sofa::core::objectmodel::BaseContext::SearchDown);
+
+            // Voronoi Shape Function
+            if(shapeFunctionCase == 0)
+            {
+                typedef component::shapefunction::VoronoiShapeFunction<ShapeFunctionType,ImageUC> VoronoiShapeFunction;
+                VoronoiShapeFunction::SPtr voronoiShapeFctSptr = addNew <VoronoiShapeFunction> (patchNode,"shapeFunction");
+                sofa::modeling::setDataLink(&Inherited::inDofs->x0,&voronoiShapeFctSptr->f_position);
+
+                //std::cout << "voronoiShapeFctSptr->f_position size = " << voronoiShapeFctSptr->f_position.getValue().size() << std::endl;
+
+
+                voronoiShapeFctSptr->setSrc("@"+imageContainerSptr->getName(), imageContainerSptr.get());
+
+                voronoiShapeFctSptr->useDijkstra.setValue(1);
+                voronoiShapeFctSptr->method.setValue(0);
+                voronoiShapeFctSptr->f_nbRef.setValue(10);
+            }
+         
+            // Diffusion shape function
+            else if (shapeFunctionCase == 1)
+            {
+                typedef component::shapefunction::DiffusionShapeFunction<ShapeFunctionType,ImageUC> DiffusionShapeFunction;
+                DiffusionShapeFunction::SPtr diffusionShapeFctSptr = addNew <DiffusionShapeFunction> (patchNode,"shapeFunction");
+                sofa::modeling::setDataLink(&Inherited::inDofs->x0,&diffusionShapeFctSptr->f_position);
+                diffusionShapeFctSptr->setSrc("@"+imageContainerSptr->getName(), imageContainerSptr.get());
+
+            }
+           
+            // Shepard shape function
+            else if (shapeFunctionCase == 2)
+            {
+                typedef component::shapefunction::ShepardShapeFunction<ShapeFunctionType> ShepardShapeFunction;
+                ShepardShapeFunction::SPtr shepardShapeFctSptr = addNew <ShepardShapeFunction> (patchNode,"shapeFunction");
+                sofa::modeling::setDataLink(&Inherited::inDofs->x0,&shepardShapeFctSptr->f_position);
+                shepardShapeFctSptr->power.setValue(2);
+                shepardShapeFctSptr->f_nbRef.setValue(10);
+            }
+            
+            // Hat shape function with shape function discretizer
+            else if (shapeFunctionCase == 3)
+            {
+                typedef component::shapefunction::HatShapeFunction<ShapeFunctionType> HatShapeFunction;
+                HatShapeFunction::SPtr hatShapeFctSptr = addNew <HatShapeFunction> (patchNode,"shapeFunction");
+                sofa::modeling::setDataLink(&Inherited::inDofs->x0,&hatShapeFctSptr->f_position);
+                hatShapeFctSptr->f_nbRef.setValue(10);
+                typedef component::engine::ShapeFunctionDiscretizer<ImageUC> ShapeFunctionDiscretizer;
+                ShapeFunctionDiscretizer::SPtr shapeFunctionDiscretizerSPtr = addNew <ShapeFunctionDiscretizer> (patchNode,"shapeFunctionDiscretizer");
+                shapeFunctionDiscretizerSPtr->setSrc("@"+imageContainerSptr->getName(), imageContainerSptr.get());
+            }
+
+        }
+        
         void SetRandomAffineTransform (int /*seed*/)
         {
             // Matrix 3*3
@@ -117,18 +191,18 @@ namespace sofa {
         }
         
         /// After simulation compare the positions of points to the theoretical positions.
-        bool runTest(double /*convergenceAccuracy*/)
+        bool runTest()
         {
             // Init simulation
             sofa::simulation::getSimulation()->init(this->root.get());
      
             // xin
-            typename  InDOFs::ReadVecCoord x = this->inDofs->readPositions();
+            typename  InDOFs::ReadVecCoord x = Inherited::inDofs->readPositions();
             InVecCoord xin(x.size());
             copyFromData(xin,x);
-    
+
             // xout
-            typename  OutDOFs::ReadVecCoord xelasticityDofs = this->outDofs->readPositions();
+            typename  OutDOFs::ReadVecCoord xelasticityDofs = Inherited::outDofs->readPositions();
             OutVecCoord xout(xelasticityDofs.size());
             copyFromData(xout,xelasticityDofs);
 
@@ -144,7 +218,7 @@ namespace sofa {
                 OutFrame &f = expectedChildCoords[i].getF();
                 f = testedRotation;
             }
-
+           
            // run the mapping test
            return Inherited::runTest(xin,xout,parentNew,expectedChildCoords);
 
@@ -152,7 +226,7 @@ namespace sofa {
         
     };
 
-      // Define the list of DataTypes to instantiate
+    // Define the list of DataTypes to instantiate
     using testing::Types;
     typedef testing::Types<
         LinearMapping<Affine3Types, F331Types>,
@@ -160,12 +234,34 @@ namespace sofa {
     > DataTypes; // the types to instantiate.
 
     // Test suite for all the instantiations
-    TYPED_TEST_CASE(AffineLinearDeformationMappings_test, DataTypes);
+    TYPED_TEST_CASE(ShapeFunction_test, DataTypes);
 
-    // test case: polarcorotationalStrainMapping 
-    TYPED_TEST( AffineLinearDeformationMappings_test , AffineStrainDeformationPatchTest)
+    // test case: voronoi shape function test
+    TYPED_TEST( ShapeFunction_test , VoronoiShapeFunctionTest)
     {
-        ASSERT_TRUE( this->runTest(1e-15));
+        this->SetShapeFunction(0);
+        ASSERT_TRUE( this->runTest());
+    }
+
+    // test case: diffusion shape function test
+    TYPED_TEST( ShapeFunction_test , DiffusionShapeFunctionTest)
+    {
+        this->SetShapeFunction(1);
+        ASSERT_TRUE( this->runTest());
+    }
+    
+    // test case: shepard shape function test
+    TYPED_TEST( ShapeFunction_test , ShepardShapeFunctionTest)
+    {
+        this->SetShapeFunction(2);
+        ASSERT_TRUE( this->runTest());
+    }
+
+    // test case: hat shape function test
+    TYPED_TEST( ShapeFunction_test , HatShapeFunctionTest)
+    {
+        this->SetShapeFunction(3);
+        ASSERT_TRUE( this->runTest());
     }
 
 } // namespace sofa
