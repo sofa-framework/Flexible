@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, version 1.0 beta 4      *
-*                (c) 2006-2009 MGH, INRIA, USTL, UJF, CNRS                    *
+*       SOFA, Simulation Open-Framework Architecture, version 1.0 RC 1        *
+*                (c) 2006-2011 MGH, INRIA, USTL, UJF, CNRS                    *
 *                                                                             *
 * This library is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -16,40 +16,39 @@
 * along with this library; if not, write to the Free Software Foundation,     *
 * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA.          *
 *******************************************************************************
-*                               SOFA :: Modules                               *
+*                               SOFA :: Plugins                               *
 *                                                                             *
 * Authors: The SOFA Team and external contributors (see Authors.txt)          *
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#define FLEXIBLE_DiffusionShapeFunction_CPP
+#define SOFA_COMPONENT_MAPPING_TetrahedronVolumeMapping_CPP
 
 #include "../initFlexible.h"
-#include "../shapeFunction/DiffusionShapeFunction.h"
+#include "TetrahedronVolumeMapping.h"
 #include <sofa/core/ObjectFactory.h>
+
 
 namespace sofa
 {
 namespace component
 {
-namespace shapefunction
+namespace mapping
 {
 
-using namespace defaulttype;
-using namespace core::behavior;
+SOFA_DECL_CLASS(TetrahedronVolumeMapping);
 
-SOFA_DECL_CLASS(DiffusionShapeFunction)
+using namespace defaulttype;
 
 // Register in the Factory
-int DiffusionShapeFunctionClass = core::RegisterObject("Computes shape functions based on diffusion in images")
+int TetrahedronVolumeMappingClass = core::RegisterObject("Map deformation gradients to the invariants of the right Cauchy Green deformation tensor: I1, I2 and J")
 
-        .add< DiffusionShapeFunction<ShapeFunction,ImageUC> >()
-        .add< DiffusionShapeFunction<ShapeFunction,ImageD> >(true)
+        .add< TetrahedronVolumeMapping< Vec3Types, Vec1Types > >(true)
         ;
 
-template class SOFA_Flexible_API DiffusionShapeFunction<ShapeFunction,ImageUC>;
-template class SOFA_Flexible_API DiffusionShapeFunction<ShapeFunction,ImageD>;
+template class SOFA_Flexible_API TetrahedronVolumeMapping< Vec3Types, Vec1Types >;
 
-}
-}
-}
+} // namespace mapping
+} // namespace component
+} // namespace sofa
+
