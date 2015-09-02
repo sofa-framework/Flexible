@@ -22,15 +22,15 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef INITFlexible_H
-#define INITFlexible_H
+#ifndef FLEXIBLE_CONFIG_H
+#define FLEXIBLE_CONFIG_H
 
 #include <sofa/helper/system/config.h>
 
 #ifdef SOFA_BUILD_Flexible
-#define SOFA_Flexible_API SOFA_EXPORT_DYNAMIC_LIBRARY
+#  define SOFA_Flexible_API SOFA_EXPORT_DYNAMIC_LIBRARY
 #else
-#define SOFA_Flexible_API  SOFA_IMPORT_DYNAMIC_LIBRARY
+#  define SOFA_Flexible_API  SOFA_IMPORT_DYNAMIC_LIBRARY
 #endif
 
-#endif // INITFlexible_H
+#endif
