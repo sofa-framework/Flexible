@@ -177,7 +177,7 @@ set(SOURCE_FILES
     types/StrainTypes.cpp
     )
 set(README_FILES
-    README_Flexible.txt
+    README.txt
     )
 # Config files and install rules for pythons scripts
 sofa_install_pythonscripts(
