@@ -209,6 +209,16 @@ if(image_FOUND)
         shapeFunction/ShapeFunctionDiscretizer.cpp
         shapeFunction/VoronoiShapeFunction.cpp
         )
+
+    find_package(DiffusionSolver QUIET)
+    if(DiffusionSolver_FOUND)
+        list(APPEND HEADER_FILES
+        shapeFunction/DiffusionShapeFunction.h
+        )
+    list(APPEND SOURCE_FILES
+        shapeFunction/DiffusionShapeFunction.cpp
+        )
+    endif()
 else()
     message(STATUS "Flexible: could not find image")
 endif()
@@ -232,6 +242,9 @@ target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 if(image_FOUND)
     target_link_libraries(${PROJECT_NAME} PUBLIC image)
+    if(DiffusionSolver_FOUND)
+        target_link_libraries(${PROJECT_NAME} PUBLIC DiffusionSolver)
+    endif()
 endif()
 
 if(Sofa.GL_FOUND)
