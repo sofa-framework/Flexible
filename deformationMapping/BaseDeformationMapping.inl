@@ -137,13 +137,9 @@ void BaseDeformationMappingT<JacobianBlockType>::resizeOut()
     {
         // TODO this must be done before resizeOut() but is done again in Inherit::init();
         // also clean the numerous calls to apply
-        core::behavior::BaseMechanicalState *state;
-        if ((state = this->fromModel.get()->toBaseMechanicalState()))
-            this->maskFrom = &state->forceMask;
-        if ((state = this->toModel.get()->toBaseMechanicalState()))
-            this->maskTo = &state->forceMask;
-        else
+        if (!(this->toModel.get()->toBaseMechanicalState()))
             this->setNonMechanical();
+
     }
 
     helper::ReadAccessor<Data<OutVecCoord> > out (*this->toModel->read(core::ConstVecCoordId::position()));
@@ -248,12 +244,7 @@ void BaseDeformationMappingT<JacobianBlockType>::resizeOut(const type::vector<Co
     {
         // TODO this must be done before resizeOut() but is done again in Inherit::init();
         // also clean the numerous calls to apply
-        core::behavior::BaseMechanicalState *state;
-        if( (state = this->fromModel.get()->toBaseMechanicalState()) )
-            this->maskFrom = &state->forceMask;
-        if( (state = this->toModel.get()->toBaseMechanicalState()) )
-            this->maskTo = &state->forceMask;
-        else
+        if (!(this->toModel.get()->toBaseMechanicalState()))
             this->setNonMechanical();
     }
 
@@ -336,7 +327,7 @@ void BaseDeformationMappingT<JacobianBlockType>::updateJ()
 
     J.resizeBlocks(jacobian.size(),in.size());
 
-    for( size_t i=0 ; i<this->maskTo->size() ; ++i)
+    for( size_t i=0 ; i<jacobian.size() ; ++i)
     {
         J.beginBlockRow(i);
         for(size_t j=0; j<jacobian[i].size(); j++)
@@ -412,16 +403,13 @@ void BaseDeformationMappingT<JacobianBlockType>::applyJ(OutVecDeriv& out, const 
     {
         const VecVRef& indices = this->f_index.getValue();
 
-        for( size_t i=0 ; i<this->maskTo->size() ; ++i)
+        for( size_t i=0 ; i<jacobian.size() ; ++i)
         {
-            if( !this->maskTo->isActivated() || this->maskTo->getEntry(i) )
+            out[i]=OutDeriv();
+            for(size_t j=0; j<jacobian[i].size(); j++)
             {
-                out[i]=OutDeriv();
-                for(size_t j=0; j<jacobian[i].size(); j++)
-                {
-                    size_t index=indices[i][j];
-                    jacobian[i][j].addmult(out[i],in[index]);
-                }
+                size_t index=indices[i][j];
+                jacobian[i][j].addmult(out[i],in[index]);
             }
         }
     }
@@ -476,16 +464,13 @@ void BaseDeformationMappingT<JacobianBlockType>::applyJ(const core::MechanicalPa
         const InVecDeriv& in = dIn.getValue();
         const VecVRef& indices = this->f_index.getValue();
 
-        for( size_t i=0 ; i<this->maskTo->size() ; ++i)
+        for( size_t i=0 ; i<jacobian.size() ; ++i)
         {
-            if( !this->maskTo->isActivated() || this->maskTo->getEntry(i) )
+            out[i]=OutDeriv();
+            for(size_t j=0; j<jacobian[i].size(); j++)
             {
-                out[i]=OutDeriv();
-                for(size_t j=0; j<jacobian[i].size(); j++)
-                {
-                    size_t index=indices[i][j];
-                    jacobian[i][j].addmult(out[i],in[index]);
-                }
+                size_t index=indices[i][j];
+                jacobian[i][j].addmult(out[i],in[index]);
             }
         }
 
@@ -507,15 +492,12 @@ void BaseDeformationMappingT<JacobianBlockType>::applyJT(const core::MechanicalP
         const OutVecDeriv& out = dOut.getValue();
         const VecVRef& indices = this->f_index.getValue();
 
-        for( size_t i=0 ; i<this->maskTo->size() ; ++i)
+        for( size_t i=0 ; i<jacobian.size() ; ++i)
         {
-            if( this->maskTo->getEntry(i) )
+            for(size_t j=0; j<jacobian[i].size(); j++)
             {
-                for(size_t j=0; j<jacobian[i].size(); j++)
-                {
-                    size_t index=indices[i][j];
-                    jacobian[i][j].addMultTranspose(in[index],out[i]);
-                }
+                size_t index=indices[i][j];
+                jacobian[i][j].addMultTranspose(in[index],out[i]);
             }
         }
 
@@ -554,15 +536,12 @@ void BaseDeformationMappingT<JacobianBlockType>::applyDJT(const core::Mechanical
         {
 
             const VecVRef& indices = this->f_index.getValue();
-            for( size_t i=0 ; i<this->maskTo->size() ; ++i)
+            for( size_t i=0 ; i<jacobian.size() ; ++i)
             {
-                if( this->maskTo->getEntry(i) )
+                for(size_t j=0; j<jacobian[i].size(); j++)
                 {
-                    for(size_t j=0; j<jacobian[i].size(); j++)
-                    {
-                        size_t index=indices[i][j];
-                        jacobian[i][j].addDForce(parentForce[index],parentDisplacement[index],childForce[i], mparams->kFactor());
-                    }
+                    size_t index=indices[i][j];
+                    jacobian[i][j].addDForce(parentForce[index],parentDisplacement[index],childForce[i], mparams->kFactor());
                 }
             }
         }
@@ -899,24 +878,6 @@ typename BaseDeformationMappingT<JacobianBlockType>::SparseMatrix& BaseDeformati
 {
     if(!this->assemble.getValue() || !BlockType::constant) updateJ();
     return jacobian;
-}
-
-
-template <class JacobianBlockType>
-void BaseDeformationMappingT<JacobianBlockType>::updateForceMask()
-{
-    const VecVRef& indices = this->f_index.getValue();
-    for( size_t i=0 ; i<this->maskTo->size() ; ++i)
-    {
-        if( this->maskTo->getEntry(i) )
-        {
-            for(size_t j=0; j<jacobian[i].size(); j++)
-            {
-                size_t index = indices[i][j];
-                this->maskFrom->insertEntry( index );
-            }
-        }
-    }
 }
 
 

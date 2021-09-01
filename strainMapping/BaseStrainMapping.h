@@ -131,11 +131,6 @@ public:
     //@{
     void init() override
     {
-        if( core::behavior::BaseMechanicalState* stateFrom = this->fromModel.get()->toBaseMechanicalState() )
-            maskFrom = &stateFrom->forceMask;
-        if( core::behavior::BaseMechanicalState* stateTo = this->toModel.get()->toBaseMechanicalState() )
-            maskTo = &stateTo->forceMask;
-
         // init jacobians
         baseMatrices.resize( 1 ); // just a wrapping for getJs()
         baseMatrices[0] = &eigenJacobian;

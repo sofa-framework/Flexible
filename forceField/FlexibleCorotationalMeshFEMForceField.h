@@ -350,9 +350,6 @@ protected:
         m_rotatedDofs = core::objectmodel::New< RotatedDofs >(); m_rotatedDofs->x0.forceSet(); m_rotatedDofs->dx.forceSet();
         m_deformationDofs = core::objectmodel::New< DeformationDofs >();
 
-        m_rotatedDofs.get()->forceMask.activate(false);
-        m_deformationDofs.get()->forceMask.activate(false);
-
         m_gaussPointSampler = core::objectmodel::New< GaussPointSampler >();
         m_internalShapeFunction = core::objectmodel::New< ShapeFunction >();
         m_rotatedTopology = core::objectmodel::New< MeshTopology >();

@@ -295,8 +295,6 @@ protected:
     Data< float > showColorScale; ///< Color mapping scale
     Data< unsigned > d_geometricStiffness; ///< 0=no GS, 1=non symmetric, 2=symmetrized
     Data< bool > d_parallel;		///< use openmp ?
-
-    virtual void updateForceMask() override;
 };
 
 
