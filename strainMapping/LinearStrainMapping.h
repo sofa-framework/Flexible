@@ -273,9 +273,6 @@ protected:
     Data<VecVRef > d_index;      ///< Store child to parent relationship. index[i][j] is the index of the j-th parent influencing child i.
     Data<VecVReal > d_w;      ///< Influence weights of the parent for each child
 
-    helper::StateMask* maskFrom;  ///< Subset of master DOF, to cull out computations involving null forces or displacements
-    helper::StateMask* maskTo;    ///< Subset of slave DOF, to cull out computations involving null forces or displacements
-
     SparseMatrixEigen eigenJacobian;  ///< Assembled Jacobian matrix
     type::vector<defaulttype::BaseMatrix*> baseMatrices;      ///< Vector of jacobian matrices, for the Compliant plugin API
 

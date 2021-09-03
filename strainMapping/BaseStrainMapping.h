@@ -373,9 +373,6 @@ protected:
 
     SparseMatrix jacobian;   ///< Jacobian of the mapping
 
-    helper::StateMask* maskFrom;  ///< Subset of master DOF, to cull out computations involving null forces or displacements
-    helper::StateMask* maskTo;    ///< Subset of slave DOF, to cull out computations involving null forces or displacements
-
     SparseMatrixEigen eigenJacobian;  ///< Assembled Jacobian matrix
     type::vector<defaulttype::BaseMatrix*> baseMatrices;      ///< Vector of jacobian matrices, for the Compliant plugin API
     void updateJ()
