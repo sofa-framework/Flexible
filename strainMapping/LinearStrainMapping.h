@@ -260,8 +260,6 @@ protected:
         , d_parallel(initData(&d_parallel, false, "parallel", "use openmp parallelisation?"))
         , d_index ( initData ( &d_index,"indices","parent indices for each child" ) )
         , d_w ( initData ( &d_w,"weights","influence weights of the Dofs" ) )
-        , maskFrom(NULL)
-        , maskTo(NULL)
     {
 
     }
@@ -285,7 +283,7 @@ protected:
 
         J.resizeBlocks(jacobian.size(),insize);
 
-        for( size_t i=0 ; i<this->maskTo->size() ; ++i)
+        for( size_t i=0 ; i<jacobian.size() ; ++i)
         {
             J.beginBlockRow(i);
             for(size_t j=0; j<jacobian[i].size(); j++)

@@ -363,8 +363,6 @@ protected:
         : Inherit ( from, to )
         , assemble ( initData ( &assemble,false, "assemble","Assemble the matrices (Jacobian and Geometric Stiffness) or use optimized matrix/vector multiplications" ) )
         , d_parallel(initData(&d_parallel, false, "parallel", "use openmp parallelisation?"))
-        , maskFrom(NULL)
-        , maskTo(NULL)
     {
 
     }
