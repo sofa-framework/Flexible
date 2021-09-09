@@ -99,16 +99,9 @@ void BaseDeformationMultiMappingT<JacobianBlockType1,JacobianBlockType2>::resize
     {
         // TODO this must be done before resizeOut() but is done again in Inherit::init();
         // also clean the numerous calls to apply
-        this->maskFrom1.resize( this->fromModels1.size() );
-        for( unsigned i=0 ; i<this->fromModels1.size() ; ++i )
-            if (core::behavior::BaseMechanicalState* stateFrom = this->fromModels1[i]->toBaseMechanicalState()) this->maskFrom1[i] = &stateFrom->forceMask;
-        this->maskFrom2.resize( this->fromModels2.size() );
-        for( unsigned i=0 ; i<this->fromModels2.size() ; ++i )
-            if (core::behavior::BaseMechanicalState* stateFrom = this->fromModels2[i]->toBaseMechanicalState()) this->maskFrom2[i] = &stateFrom->forceMask;
-        this->maskTo.resize( this->toModels.size() );
         for( unsigned i=0 ; i<this->toModels.size() ; ++i )
-            if (core::behavior::BaseMechanicalState* stateTo = this->toModels[i]->toBaseMechanicalState()) this->maskTo[i] = &stateTo->forceMask;
-            else this->setNonMechanical();
+            if (!this->toModels[i]->toBaseMechanicalState())
+                this->setNonMechanical();
     }
 
     helper::ReadAccessor<Data<OutVecCoord> > out (*this->toModel->read(core::ConstVecCoordId::position()));
@@ -211,16 +204,9 @@ void BaseDeformationMultiMappingT<JacobianBlockType1,JacobianBlockType2>::resize
     {
         // TODO this must be done before resizeOut() but is done again in Inherit::init();
         // also clean the numerous calls to apply
-        this->maskFrom1.resize( this->fromModels1.size() );
-        for( unsigned i=0 ; i<this->fromModels1.size() ; ++i )
-            if (core::behavior::BaseMechanicalState* stateFrom = this->fromModels1[i]->toBaseMechanicalState()) this->maskFrom1[i] = &stateFrom->forceMask;
-        this->maskFrom2.resize( this->fromModels2.size() );
-        for( unsigned i=0 ; i<this->fromModels2.size() ; ++i )
-            if (core::behavior::BaseMechanicalState* stateFrom = this->fromModels2[i]->toBaseMechanicalState()) this->maskFrom2[i] = &stateFrom->forceMask;
-        this->maskTo.resize( this->toModels.size() );
         for( unsigned i=0 ; i<this->toModels.size() ; ++i )
-            if (core::behavior::BaseMechanicalState* stateTo = this->toModels[i]->toBaseMechanicalState()) this->maskTo[i] = &stateTo->forceMask;
-            else this->setNonMechanical();
+            if (!this->toModels[i]->toBaseMechanicalState())
+                this->setNonMechanical();
     }
 
     helper::WriteOnlyAccessor<Data<VecCoord> > pos0 (this->f_pos0);
@@ -423,21 +409,19 @@ void BaseDeformationMultiMappingT<JacobianBlockType1,JacobianBlockType2>::applyJ
         const VecVRef& index1 = this->f_index1.getValue();
         const VecVRef& index2 = this->f_index2.getValue();
 
-        for( size_t i=0 ; i<this->maskTo[0]->size() ; ++i)
+        for( size_t i=0 ; i<jacobian1.size() ; ++i)
         {
-            if( !this->maskTo[0]->isActivated() || this->maskTo[0]->getEntry(i) )
+
+            out[i]=OutDeriv();
+            for(size_t j=0; j<jacobian1[i].size(); j++)
             {
-                out[i]=OutDeriv();
-                for(size_t j=0; j<jacobian1[i].size(); j++)
-                {
-                    size_t index=index1[i][j];
-                    jacobian1[i][j].addmult(out[i],in1[index]);
-                }
-                for(size_t j=0; j<jacobian2[i].size(); j++)
-                {
-                    size_t index=index2[i][j];
-                    jacobian2[i][j].addmult(out[i],in2[index]);
-                }
+                size_t index=index1[i][j];
+                jacobian1[i][j].addmult(out[i],in1[index]);
+            }
+            for(size_t j=0; j<jacobian2[i].size(); j++)
+            {
+                size_t index=index2[i][j];
+                jacobian2[i][j].addmult(out[i],in2[index]);
             }
         }
 
@@ -465,20 +449,17 @@ void BaseDeformationMultiMappingT<JacobianBlockType1,JacobianBlockType2>::applyJ
         const VecVRef& index1 = this->f_index1.getValue();
         const VecVRef& index2 = this->f_index2.getValue();
 
-        for( size_t i=0 ; i<this->maskTo[0]->size() ; ++i)
+        for( size_t i=0 ; i<jacobian1.size() ; ++i)
         {
-            if( this->maskTo[0]->getEntry(i) )
+            for(size_t j=0; j<jacobian1[i].size(); j++)
             {
-                for(size_t j=0; j<jacobian1[i].size(); j++)
-                {
-                    size_t index=index1[i][j];
-                    jacobian1[i][j].addMultTranspose(in1[index],out[i]);
-                }
-                for(size_t j=0; j<jacobian2[i].size(); j++)
-                {
-                    size_t index=index2[i][j];
-                    jacobian2[i][j].addMultTranspose(in2[index],out[i]);
-                }
+                size_t index=index1[i][j];
+                jacobian1[i][j].addMultTranspose(in1[index],out[i]);
+            }
+            for(size_t j=0; j<jacobian2[i].size(); j++)
+            {
+                size_t index=index2[i][j];
+                jacobian2[i][j].addMultTranspose(in2[index],out[i]);
             }
         }
 
@@ -818,30 +799,6 @@ void BaseDeformationMultiMappingT<JacobianBlockType1,JacobianBlockType2>::draw(c
     }
     glPopAttrib();
 #endif /* FLEXIBLE_HAVE_SOFA_GL */
-}
-
-template <class JacobianBlockType1,class JacobianBlockType2>
-void BaseDeformationMultiMappingT<JacobianBlockType1,JacobianBlockType2>::updateForceMask()
-{
-    const VecVRef& indices1 = this->f_index1.getValue();
-    const VecVRef& indices2 = this->f_index2.getValue();
-
-    for( size_t i=0 ; i<this->maskTo[0]->size() ; ++i)
-    {
-        if( this->maskTo[0]->getEntry(i) )
-        {
-            for(size_t j=0; j<jacobian1[i].size(); j++)
-            {
-                size_t index = indices1[i][j];
-                this->maskFrom1[0]->insertEntry( index );
-            }
-            for(size_t j=0; j<jacobian2[i].size(); j++)
-            {
-                size_t index = indices2[i][j];
-                this->maskFrom2[0]->insertEntry( index );
-            }
-        }
-    }
 }
 
 } // namespace mapping

@@ -110,10 +110,6 @@ public:
     //@{
     virtual void init() override
     {
-        if( core::behavior::BaseMechanicalState* stateFrom = this->fromModel.get()->toBaseMechanicalState() )
-            maskFrom = &stateFrom->forceMask;
-        if( core::behavior::BaseMechanicalState* stateTo = this->toModel.get()->toBaseMechanicalState() )
-            maskTo = &stateTo->forceMask;
 
         // init jacobians
         baseMatrices.resize( 1 ); // just a wrapping for getJs()
@@ -264,8 +260,6 @@ protected:
         , d_parallel(initData(&d_parallel, false, "parallel", "use openmp parallelisation?"))
         , d_index ( initData ( &d_index,"indices","parent indices for each child" ) )
         , d_w ( initData ( &d_w,"weights","influence weights of the Dofs" ) )
-        , maskFrom(NULL)
-        , maskTo(NULL)
     {
 
     }
@@ -276,9 +270,6 @@ protected:
 
     Data<VecVRef > d_index;      ///< Store child to parent relationship. index[i][j] is the index of the j-th parent influencing child i.
     Data<VecVReal > d_w;      ///< Influence weights of the parent for each child
-
-    helper::StateMask* maskFrom;  ///< Subset of master DOF, to cull out computations involving null forces or displacements
-    helper::StateMask* maskTo;    ///< Subset of slave DOF, to cull out computations involving null forces or displacements
 
     SparseMatrixEigen eigenJacobian;  ///< Assembled Jacobian matrix
     type::vector<defaulttype::BaseMatrix*> baseMatrices;      ///< Vector of jacobian matrices, for the Compliant plugin API
@@ -292,7 +283,7 @@ protected:
 
         J.resizeBlocks(jacobian.size(),insize);
 
-        for( size_t i=0 ; i<this->maskTo->size() ; ++i)
+        for( size_t i=0 ; i<jacobian.size() ; ++i)
         {
             J.beginBlockRow(i);
             for(size_t j=0; j<jacobian[i].size(); j++)

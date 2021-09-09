@@ -131,11 +131,6 @@ public:
     //@{
     void init() override
     {
-        if( core::behavior::BaseMechanicalState* stateFrom = this->fromModel.get()->toBaseMechanicalState() )
-            maskFrom = &stateFrom->forceMask;
-        if( core::behavior::BaseMechanicalState* stateTo = this->toModel.get()->toBaseMechanicalState() )
-            maskTo = &stateTo->forceMask;
-
         // init jacobians
         baseMatrices.resize( 1 ); // just a wrapping for getJs()
         baseMatrices[0] = &eigenJacobian;
@@ -368,8 +363,6 @@ protected:
         : Inherit ( from, to )
         , assemble ( initData ( &assemble,false, "assemble","Assemble the matrices (Jacobian and Geometric Stiffness) or use optimized matrix/vector multiplications" ) )
         , d_parallel(initData(&d_parallel, false, "parallel", "use openmp parallelisation?"))
-        , maskFrom(NULL)
-        , maskTo(NULL)
     {
 
     }
@@ -377,9 +370,6 @@ protected:
     ~BaseStrainMappingT() override     { }
 
     SparseMatrix jacobian;   ///< Jacobian of the mapping
-
-    helper::StateMask* maskFrom;  ///< Subset of master DOF, to cull out computations involving null forces or displacements
-    helper::StateMask* maskTo;    ///< Subset of slave DOF, to cull out computations involving null forces or displacements
 
     SparseMatrixEigen eigenJacobian;  ///< Assembled Jacobian matrix
     type::vector<defaulttype::BaseMatrix*> baseMatrices;      ///< Vector of jacobian matrices, for the Compliant plugin API

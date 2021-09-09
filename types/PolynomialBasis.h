@@ -31,6 +31,7 @@
 #include <sofa/type/MatSym.h>
 #include <set>
 #include <vector>
+#include <map>
 
 #include <Eigen/Core>
 #include <Eigen/Dense>

@@ -163,8 +163,6 @@ public:
     typedef linearsolver::EigenSparseMatrix<In2,In2>    SparseKMatrixEigen2;
     //@}	
 
-    typedef typename sofa::helper::StateMask ForceMask;
-
 
     void resizeOut(); /// automatic resizing (of output model and jacobian blocks) when input samples have changed. Recomputes weights from shape function component.
     virtual void resizeOut(const type::vector<Coord>& position0, type::vector<type::vector<unsigned int> > index,type::vector<type::vector<Real> > w, type::vector<type::vector<type::Vec<spatial_dimensions,Real> > > dw, type::vector<type::vector<type::Mat<spatial_dimensions,spatial_dimensions,Real> > > ddw, type::vector<type::Mat<spatial_dimensions,spatial_dimensions,Real> > F0) override; /// resizing given custom positions and weights
@@ -295,8 +293,6 @@ protected:
     Data< float > showColorScale; ///< Color mapping scale
     Data< unsigned > d_geometricStiffness; ///< 0=no GS, 1=non symmetric, 2=symmetrized
     Data< bool > d_parallel;		///< use openmp ?
-
-    virtual void updateForceMask() override;
 };
 
 

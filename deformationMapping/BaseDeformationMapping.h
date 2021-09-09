@@ -200,8 +200,6 @@ public:
     typedef linearsolver::EigenSparseMatrix<In,In>    SparseKMatrixEigen;
     //@}	
 
-    typedef typename Inherit::ForceMask ForceMask;
-
     ///@brief Update \see f_index_parentToChild from \see f_index
     void resizeOut(); /// automatic resizing (of output model and jacobian blocks) when input samples have changed. Recomputes weights from shape function component.
     virtual void resizeOut(const type::vector<Coord>& position0, type::vector<type::vector<unsigned int> > index,type::vector<type::vector<Real> > w, type::vector<type::vector<type::Vec<spatial_dimensions,Real> > > dw, type::vector<type::vector<type::Mat<spatial_dimensions,spatial_dimensions,Real> > > ddw, type::vector<type::Mat<spatial_dimensions,spatial_dimensions,Real> > F0) override; /// resizing given custom positions and weights
@@ -346,8 +344,6 @@ protected :
     const core::topology::BaseMeshTopology::SeqTriangles *triangles; // Used for visualization
     const type::vector<component::visualmodel::VisualModelImpl::VisualTriangle> *extTriangles;
     const type::vector<component::visualmodel::VisualModelImpl::visual_index_type> *extvertPosIdx;
-
-    void updateForceMask() override;
 
 public:
 
