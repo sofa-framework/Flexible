@@ -46,6 +46,9 @@ ignore "deformation/edgeDeformationMapping.scn"
 # This scene needs time to much time to load
 ignore "demos/steak_diffusion.scn"
 
+# This scene needs image with all the templates
+ignore "deformation/linearHexaFEM-comparison.scn"
+
 # IGNORE ALL PYTHON SCENES
 ignore ".*\.py"
 ignore ".*\.pyscn"
