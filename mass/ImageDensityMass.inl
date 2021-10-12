@@ -297,7 +297,7 @@ void ImageDensityMass< DataTypes, ShapeFunctionTypes, MassType >::accFromF( cons
         for( unsigned int i=0 ; i<_f.size() ; i++ )
         {
             int rowId = i * m_massMatrix.getRowIndex().size() / m_massMatrix.rowBSize();
-            const typename MassMatrix::Bloc& b = m_massMatrix.getColsValue()[m_massMatrix.getRowBegin()[rowId]];
+            const typename MassMatrix::Block& b = m_massMatrix.getColsValue()[m_massMatrix.getRowBegin()[rowId]];
             for( int bi = 0; bi < m_massMatrix.getBlockRows(); ++bi )
                 _acc[i][bi] = _f[i][bi] / b[bi][bi];
         }
@@ -312,8 +312,8 @@ void ImageDensityMass< DataTypes, ShapeFunctionTypes, MassType >::accFromF( cons
         for( unsigned int i=0 ; i<_f.size() ; i++ )
         {
             int rowId = i * m_massMatrix.getRowIndex().size() / m_massMatrix.rowBSize();
-            const typename MassMatrix::Bloc& b = m_massMatrix.getColsValue()[m_massMatrix.getRowBegin()[rowId]];
-            typename MassMatrix::Bloc invb;
+            const typename MassMatrix::Block& b = m_massMatrix.getColsValue()[m_massMatrix.getRowBegin()[rowId]];
+            typename MassMatrix::Block invb;
             invb.invert( b );
             _acc[i] = invb * _f[i];
             // todo either store the inverted matrices or do not compute the inverse but store a factorization
@@ -420,7 +420,7 @@ void ImageDensityMass< DataTypes, ShapeFunctionTypes, MassType >::addMToMatrix(c
         for (int xj = rowRange.begin(); xj < rowRange.end(); ++xj)
         {
             typename MassMatrix::Index jN = m_massMatrix.getColsIndex()[xj] * m_massMatrix.getBlockCols();
-            const typename MassMatrix::Bloc& b = m_massMatrix.getColsValue()[xj];
+            const typename MassMatrix::Block& b = m_massMatrix.getColsValue()[xj];
             for (int bi = 0; bi < m_massMatrix.getBlockRows(); ++bi)
                 for (int bj = 0; bj < m_massMatrix.getBlockCols(); ++bj)
                     m->add( iN+bi, jN+bj, b[bi][bj]*mFactor );
@@ -454,7 +454,7 @@ void ImageDensityMass< DataTypes, ShapeFunctionTypes, MassType >::getElementMass
         typename MassMatrix::Range rowRange( m_massMatrix.getRowBegin()[rowId], m_massMatrix.getRowBegin()[rowId+1] );
         for( int xj = rowRange.begin() ; xj < rowRange.end() ; ++xj )
         {
-            const typename MassMatrix::Bloc& b = m_massMatrix.getColsValue()[xj];
+            const typename MassMatrix::Block& b = m_massMatrix.getColsValue()[xj];
             for ( int bi = 0; bi < m_massMatrix.getBlockRows() ; ++bi )
                 for ( int bj = 0; bj < m_massMatrix.getBlockCols() ; ++bj )
                     m->add( bi, bi, b[bi][bj] ); // diagonal lumping
