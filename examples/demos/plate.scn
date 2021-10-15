@@ -22,7 +22,7 @@
   <TransferFunction name="youngM" template="ImageUC,ImageD" inputImage="@extruder.outputImage" param="0 0 100 1000 255 100000"/>
   <!--  <ImageViewer template="ImageD" name="viewer" image="@youngM.outputImage" transform="@extruder.outputTransform" /> -->
   <EulerImplicitSolver  rayleighStiffness="0.1" rayleighMass="0.1" />
-  <CGLinearSolver  />
+  <CGLinearSolver iterations="25" tolerance="1e-5" threshold="1e-5"/>
 
 
 

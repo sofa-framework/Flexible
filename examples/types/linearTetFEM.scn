@@ -11,7 +11,8 @@
 <!--     <EulerImplicitSolver  rayleighStiffness="0.1" rayleighMass="0.1" /> <CGLinearSolver  /> -->
 
      <Node 	name="FEM"   >
-    <EulerImplicitSolver /> <CGLinearSolver  />
+    <EulerImplicitSolver />
+	<CGLinearSolver iterations="25" tolerance="1e-5" threshold="1e-5"/>
 	      <MeshGmshLoader name="loader" filename="mesh/torus_low_res.msh" />
 	      <MeshTopology name="mesh" src="@loader" />
 	      <MechanicalObject template="Vec3d" name="parent" />

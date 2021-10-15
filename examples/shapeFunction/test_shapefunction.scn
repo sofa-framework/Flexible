@@ -14,7 +14,7 @@
     <BarycentricShapeFunction position="@parent.rest_position" />
 
     <EulerImplicitSolver  rayleighStiffness="0.1" rayleighMass="0.1" />
-    <CGLinearSolver  />
+    <CGLinearSolver iterations="25" tolerance="1e-5" threshold="1e-5"/>
     <UniformMass vertexMass="1" />
 
     <Node 	name="Child"   >

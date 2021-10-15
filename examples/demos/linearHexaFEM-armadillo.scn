@@ -17,7 +17,7 @@
     <ImageSampler template="ImageB" name="sampler" src="@image" param="1" showEdges="false" printLog="true"/>
 
     <EulerImplicitSolver rayleighMass="1" rayleighStiffness="0.03" />
-    <CGLinearSolver />
+    <CGLinearSolver iterations="25" tolerance="1e-5" threshold="1e-5"/>
 
 
     <MeshTopology  name="grid" src="@sampler" />
