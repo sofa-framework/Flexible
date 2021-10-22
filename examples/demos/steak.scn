@@ -22,7 +22,7 @@
 
 
   <EulerImplicitSolver rayleighStiffness="0.05"  rayleighMass="0.05" />
-  <CGLinearSolver template="GraphScattered" iterations="10"  threshold="1e-008" />
+  <CGLinearSolver template="GraphScattered" iterations="10"  threshold="1e-008" tolerance="1e-5"/>
 
  <Node 	name="Flexible"   >
 		

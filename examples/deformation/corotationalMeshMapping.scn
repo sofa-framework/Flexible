@@ -10,7 +10,7 @@
     
     <Node 	name="CorotationalStrain"   >
 	<EulerImplicitSolver  rayleighStiffness="0.1" rayleighMass="0.1" /> 
-	<CGLinearSolver  />
+	<CGLinearSolver iterations="25" tolerance="1e-5" threshold="1e-5" />
         <MeshGmshLoader name="loader" filename="mesh/torus_low_res.msh" />
 	<MeshTopology name="mesh" src="@loader" />
 	<MechanicalObject template="Vec3d" name="parent" showObject="false" showObjectScale="0.05" />
@@ -43,7 +43,7 @@
 
     <Node 	name="CorotationalMesh"   >
 	<EulerImplicitSolver /> 
-	<CGLinearSolver  />
+	<CGLinearSolver iterations="25" tolerance="1e-5" threshold="1e-5"/>
         <MeshGmshLoader name="loader" filename="mesh/torus_low_res.msh" />
 	<MeshTopology name="mesh" src="@loader" />
 	<MechanicalObject template="Vec3d" name="parent" showObject="false" showObjectScale="0.05" />
